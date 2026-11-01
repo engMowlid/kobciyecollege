@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kobciye International College — Attendance Management System</title>
+<link rel="icon" type="image/png" href="img-2c8b4f18.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="window.__sbScriptFailed=true"></script>
+<link rel="stylesheet" href="portal.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage">
+  <div class="login-wrap">
+    <div class="login-logo">
+      <div class="login-logo-badge"><img src="img-4ac9b06c.png" alt="Kobciye International College logo"></div>
+      <h1>Kobciye International College</h1>
+      <p>Baidoa, Somalia — Select your role to sign in</p>
+    </div>
+    <div class="login-card">
+      <a href="javascript:void(0)" id="backToWebsiteLink" style="display:inline-block;font-size:12.5px;font-weight:700;color:var(--muted);text-decoration:none;margin-bottom:10px;">&larr; Back to Website</a>
+      <a href="javascript:void(0)" id="portalBackLink" style="display:none;font-size:12.5px;font-weight:700;color:var(--teal-700);text-decoration:none;margin-bottom:10px;">&larr; Choose a different portal</a>
+      <h2 id="portalCardTitle">Select Portal &amp; Sign In</h2>
+      <p class="sub" id="portalCardSub">Click your portal, then enter your username and password.</p>
+      <div class="portal-grid" id="portalGrid">
+        <div class="portal-btn" data-role="admin">
+          <div class="portal-icon" style="background:#282058"><svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 1 1 0 10A5 5 0 0 1 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/><path d="M19 8l2 2-4.5 4.5L15 13z"/></svg></div>
+          <strong>Admin</strong>
+          <span class="portal-room">All Rooms</span>
+          <span class="portal-sub">Full system access</span>
+        </div>
+        <div class="portal-btn" data-role="teacher">
+          <div class="portal-icon" style="background:#007a00"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 11l1.5 1.5L20 10"/></svg></div>
+          <strong>Teacher</strong>
+          <span class="portal-room" style="background:#dff3df;color:#007a00;">Any Room</span>
+          <span class="portal-sub">Sign in with your username</span>
+        </div>
+        <div class="portal-btn" data-role="student">
+          <div class="portal-icon" style="background:#0a5a0a"><svg viewBox="0 0 24 24"><path d="M22 9 12 4 2 9l10 5 10-5z"/><path d="M6 11.5V17c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5.5"/></svg></div>
+          <strong>Student</strong>
+          <span class="portal-room" style="background:#ecebf8;color:#282058;">My Records</span>
+          <span class="portal-sub">View attendance</span>
+        </div>
+        <div class="portal-btn" data-role="finance">
+          <div class="portal-icon" style="background:#4a3fa0"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 6v.01M18 6v.01M6 18v-.01M18 18v-.01"/></svg></div>
+          <strong>Finance</strong>
+          <span class="portal-room" style="background:#e9e7f7;color:#4a3fa0;">Payments</span>
+          <span class="portal-sub">Sign in with your username</span>
+        </div>
+      </div>
+      <div class="login-error" id="connError" style="display:none;">
+        <span id="connErrorMsg"></span>
+        <button type="button" id="retryConnBtn" style="margin-left:8px;text-decoration:underline;background:none;border:none;color:inherit;font-weight:800;cursor:pointer;padding:0;">Retry</button>
+      </div>
+      <div class="login-error" id="loginError">Incorrect password. Please try again.</div>
+      <div class="login-field" id="usernameWrap" style="display:none;">
+        <label for="loginUsername" id="loginUsernameLabel">Username</label>
+        <input type="text" id="loginUsername" placeholder="Enter your username">
+      </div>
+      <div class="login-field" id="passwordWrap" style="display:none;">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" placeholder="Enter your password">
+      </div>
+      <button class="login-btn" id="loginBtn"><span id="loginBtnText">Sign In &rarr;</span><span class="btn-spinner" id="loginBtnSpinner" style="display:none;"></span></button>
+      <div class="login-hint">Teachers: ask your Admin for a username + password &nbsp;|&nbsp; Students: your Roll Number is your username (default password = your Roll No)</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="mainApp">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-badge"><img src="img-4ac9b06c.png" alt="Kobciye International College logo"></div>
+      <div class="brand-text"><strong id="orgNameDisplay">ATTENDANCE</strong><span>Management System</span></div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="u-avatar" id="sidebarAvatar">A</div>
+      <div class="u-info">
+        <strong id="sidebarUserName">Admin</strong>
+        <span id="sidebarUserRole">Administrator</span>
+      </div>
+    </div>
+
+    <!-- Filters: Admin gets room+period dropdowns; teachers get locked room badge + period dropdown -->
+    <div class="filter-wrap">
+      <!-- Admin room selector -->
+      <div id="adminRoomWrap">
+        <label for="sidebarRoomSelect">Room</label>
+        <select id="sidebarRoomSelect" class="room-filter-select">
+          <option value="">All Rooms</option>
+          <option value="Room A">Room A</option>
+          <option value="Room B">Room B</option>
+          <option value="Room C">Room C</option>
+        </select>
+      </div>
+      <!-- Teacher locked room badge -->
+      <div id="teacherRoomBadge" style="display:none;">
+        <label>Your Room</label>
+        <div class="room-badge" id="teacherRoomBadgeInner">
+          <svg viewBox="0 0 24 24"><path d="M3 10.5L12 4l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21V12h6v9"/></svg>
+          <span id="teacherRoomLabel">Room A</span>
+        </div>
+      </div>
+      <!-- Period filter for everyone -->
+      <div>
+        <label for="sidebarPeriodSelect">Period</label>
+        <select id="sidebarPeriodSelect">
+          <option value="">All Periods</option>
+        </select>
+      </div>
+    </div>
+
+    <nav class="nav" id="navList">
+      <button class="nav-item active staff-only" data-view="dashboard"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/></svg>Dashboard</button>
+      <button class="nav-item staff-only" data-view="students"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="8.5" r="2.4"/><path d="M16 14.3c2.4.3 4 2.1 4 4.7"/></svg>Students</button>
+      <button class="nav-item staff-only" data-view="attendance"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M8.5 14.5l1.8 1.8 4-4.3"/></svg>Attendance</button>
+      <button class="nav-item staff-only" data-view="reports"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>Reports</button>
+      <button class="nav-item staff-only" data-view="results"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Results</button>
+      <button class="nav-item staff-only" data-view="search"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></svg>View Student</button>
+      <button class="nav-item admin-only" data-view="teachers"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Teachers</button>
+      <button class="nav-item admin-only" data-view="users"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="7" r="3.2"/><path d="M9 21v-2a3 3 0 0 1 3-3 3 3 0 0 1 3 3v2"/></svg>Users</button>
+      <button class="nav-item admin-only" data-view="admissions"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg>Admissions</button>
+      <button class="nav-item admin-only" data-view="websiteevents"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Website Events</button>
+      <button class="nav-item admin-only" data-view="websitegallery"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Moments Gallery</button>
+      <button class="nav-item admin-only" data-view="websitefaculty"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Website Faculty</button>
+      <button class="nav-item admin-only" data-view="websitelife"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="15" height="16" rx="2"/><path d="M17 8l5-3v14l-5-3"/></svg>Life at KIC</button>
+      <button class="nav-item finance-only" data-view="findashboard" style="display:none;"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/></svg>Dashboard</button>
+      <button class="nav-item fin-access" data-view="finance"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 6v.01M18 6v.01M6 18v-.01M18 18v-.01"/></svg>Finance</button>
+      <button class="nav-item fin-access" data-view="feestatus"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Fee Status</button>
+      <button class="nav-item admin-only" data-view="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</button>
+      <button class="nav-item admin-only" data-view="backup"><svg viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-1-8.9 5.5 5.5 0 0 1 10.7-1.7A4 4 0 0 1 18 18H7z"/><path d="M12 11v7M9.5 15.5 12 18l2.5-2.5"/></svg>Backup</button>
+      <button class="nav-item student-only" data-view="myattendance" style="display:none;"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M8.5 14.5l1.8 1.8 4-4.3"/></svg>My Attendance</button>
+      <button class="nav-item student-only" data-view="myresults" style="display:none;"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>My Results</button>
+      <button class="nav-item student-only" data-view="myinvoices" style="display:none;"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 6v.01M18 6v.01M6 18v-.01M18 18v-.01"/></svg>My Invoices</button>
+      <button class="nav-item" data-view="profile" id="navProfile" style="display:none;"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>My Profile</button>
+      <button class="nav-item nav-exit" data-view="exit"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>Logout</button>
+    </nav>
+    <div class="sidebar-foot">Data synced live via Supabase.</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="menu-btn" id="menuBtn"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        <h1 id="pageTitle">Dashboard</h1>
+      </div>
+      <div class="user"><span id="topWelcome">Welcome, Admin</span><div class="avatar" id="topAvatar">A</div></div>
+    </header>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <section class="view active staff-only" id="view-dashboard">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px;">
+          <div><h2 style="font-size:19px;font-weight:800;">Today's Overview</h2><p id="dashSubtitle" style="margin:4px 0 0;color:var(--muted);font-size:13.5px;">Loading...</p></div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span class="note" id="dashTodayDate" style="padding:5px 12px;"></span>
+            <button class="btn btn-primary" data-go="attendance"><svg viewBox="0 0 24 24"><path d="M8.5 14.5l1.8 1.8 4-4.3"/><rect x="3" y="4.5" width="18" height="16" rx="2"/></svg>Mark Attendance</button>
+          </div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-top"><span class="stat-label">Total Students</span><div class="stat-ico" style="background:var(--teal-800)"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/></svg></div></div><div class="stat-value" id="statTotal">0</div><div class="stat-sub">enrolled</div></div>
+          <div class="stat-card"><div class="stat-top"><span class="stat-label">Present Today</span><div class="stat-ico" style="background:var(--green)"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div></div><div class="stat-value" id="statPresent">0</div><div class="stat-sub">marked present</div></div>
+          <div class="stat-card"><div class="stat-top"><span class="stat-label">Absent Today</span><div class="stat-ico" style="background:var(--red)"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></div></div><div class="stat-value" id="statAbsent">0</div><div class="stat-sub">marked absent</div></div>
+          <div class="stat-card"><div class="stat-top"><span class="stat-label">On Leave</span><div class="stat-ico" style="background:var(--blue)"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></div></div><div class="stat-value" id="statLeave">0</div><div class="stat-sub">approved leave</div></div>
+          <div class="stat-card"><div class="stat-top"><span class="stat-label">Attendance %</span><div class="stat-ico" style="background:var(--gold-dark)"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7"/></svg></div></div><div class="stat-value" id="statPercent">0%</div><div class="stat-sub">present / total</div></div>
+        </div>
+        <!-- Admin-only: room breakdown cards -->
+        <div id="adminRoomOverview" class="admin-only" style="display:none;"></div>
+        <div class="card">
+          <div class="card-head"><h3>Today's Attendance Log</h3></div>
+          <div class="table-wrap" id="dashTableWrap"></div>
+        </div>
+      </section>
+
+      <!-- STUDENTS -->
+      <section class="view staff-only" id="view-students">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="8.5" r="2.4"/><path d="M16 14.3c2.4.3 4 2.1 4 4.7"/></svg></div>
+          <div><h2>Students</h2><p id="studentsSubtitle">Manage student records.</p></div>
+        </div>
+        <div class="card">
+          <div class="filters" style="margin-bottom:14px;">
+            <label class="field admin-only" style="display:none;">Class / Room<select class="room-filter-select"></select></label>
+          </div>
+          <div class="card-head">
+            <h3 id="studentCount">0 Students</h3>
+            <button class="btn btn-primary btn-sm admin-only" id="addStudentBtn" style="display:none;"><svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="4"/><path d="M2 20c0-3.3 3.1-5.5 7-5.5M16 8v6M13 11h6"/></svg>Add New Student</button>
+          </div>
+          <div class="table-wrap" id="studentsTableWrap"></div>
+        </div>
+      </section>
+
+      <!-- ATTENDANCE -->
+      <section class="view staff-only" id="view-attendance">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M8.5 14.5l1.8 1.8 4-4.3"/></svg></div>
+          <div><h2>Mark Attendance</h2><p>School week: Saturday–Wednesday. Select a date and mark each student.</p></div>
+        </div>
+        <div class="card">
+          <div class="filters">
+            <label class="field">Date<input type="date" id="attendanceDate"></label>
+            <label class="field admin-only" style="display:none;">Class / Room<select class="room-filter-select"></select></label>
+            <button class="btn btn-ghost btn-sm" id="markAllPresentBtn"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Mark All Present</button>
+            <button class="btn btn-ghost btn-sm" id="clearMarksBtn"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>Clear</button>
+          </div>
+          <div id="weekendBanner" class="note" style="display:none;margin-bottom:14px;color:var(--red);border-color:var(--red-bg);background:var(--red-bg);">Weekend (Thu/Fri) — no school on this day.</div>
+          <div id="markList"></div>
+          <div style="margin-top:16px;display:flex;justify-content:flex-end;">
+            <button class="btn btn-primary" id="saveAttendanceBtn"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Save Attendance</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- REPORTS -->
+      <section class="view staff-only" id="view-reports">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg></div>
+          <div><h2>Reports</h2><p>Monthly attendance breakdown per student.</p></div>
+        </div>
+        <div class="card">
+          <div class="filters">
+            <label class="field">Month<input type="month" id="reportMonth"></label>
+            <button class="btn btn-ghost btn-sm" id="exportCsvBtn"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>Export CSV</button>
+          </div>
+          <div class="report-grid">
+            <div>
+              <div class="detail-grid-5" id="reportSummary"></div>
+              <div class="table-wrap" id="reportTableWrap" style="margin-top:14px;"></div>
+            </div>
+            <div class="card" style="margin:0;">
+              <h3 style="margin-bottom:10px;font-size:14px;">Present / Absent / Leave</h3>
+              <div class="chart-box"><canvas id="reportChart"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESULTS (Admin & Teacher) -->
+      <section class="view staff-only" id="view-results">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+          <div><h2>Results</h2><p>Enter and manage monthly exam results per student.</p></div>
+        </div>
+        <div class="card">
+          <div class="filters">
+            <label class="field">Month<input type="month" id="resultsMonth"></label>
+            <label class="field">Exam Type<select id="resultsExamType">
+              <option value="monthly">Monthly Exam</option>
+              <option value="bookend">Book End Exam</option>
+              <option value="final">Final Exam</option>
+            </select></label>
+            <label class="field admin-only" style="display:none;">Class / Room<select class="room-filter-select"></select></label>
+          </div>
+          <div class="table-wrap" id="resultsListWrap"></div>
+        </div>
+      </section>
+
+      <!-- VIEW STUDENT -->
+      <section class="view staff-only" id="view-search">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></svg></div>
+          <div><h2>View Student</h2><p>Search and view full attendance history.</p></div>
+        </div>
+        <div class="search-bar"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></svg><input type="text" id="searchInput" placeholder="Search by name or roll no..."></div>
+        <div class="filters admin-only" style="display:none;margin-bottom:14px;">
+          <label class="field">Class / Room<select class="room-filter-select"></select></label>
+        </div>
+        <div class="card" id="searchDetailCard" style="display:none;margin-bottom:18px;"></div>
+        <div class="search-list" id="searchList"></div>
+      </section>
+
+      <!-- TEACHERS (Admin only) -->
+      <section class="view admin-only" id="view-teachers">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <div><h2>Teachers</h2><p>Add, edit, or remove teacher accounts. Each teacher signs into the single Teacher portal with their own username + password.</p></div>
+          <button class="btn btn-primary" id="addTeacherBtn" style="margin-left:auto;"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add Teacher</button>
+        </div>
+        <div id="teacherCardsList"></div>
+      </section>
+
+      <!-- USERS (Admin only) -->
+      <section class="view admin-only" id="view-users">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="7" r="3.2"/><path d="M9 21v-2a3 3 0 0 1 3-3 3 3 0 0 1 3 3v2"/></svg></div>
+          <div><h2>Users</h2><p>Every account in the system — admin, teachers, and students — with sign-in credentials.</p></div>
+        </div>
+        <div class="search-bar"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></svg><input type="text" id="usersSearchInput" placeholder="Search by name or username..."></div>
+        <div class="card">
+          <p class="note" style="margin-bottom:12px;">Click a password to reveal it. Reset generates a new random password immediately — share it with the user.</p>
+          <div class="table-wrap" id="usersTableWrap"></div>
+        </div>
+      </section>
+
+      <!-- ADMISSIONS (Admin only) -->
+      <section class="view admin-only" id="view-admissions">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg></div>
+          <div><h2>Admissions</h2><p>Applications submitted through the website's admission form.</p></div>
+        </div>
+        <div class="search-bar"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></svg><input type="text" id="admissionsSearchInput" placeholder="Search by name, email, or program..."></div>
+        <div class="card">
+          <div class="table-wrap" id="admissionsTableWrap"></div>
+        </div>
+      </section>
+
+      <!-- WEBSITE EVENTS (Admin only) — powers the "Upcoming Events" section on the public site -->
+      <section class="view admin-only" id="view-websiteevents">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></div>
+          <div><h2>Website Events</h2><p>Manage the "Upcoming Events" cards shown on the public website. Changes appear on the site immediately.</p></div>
+          <button class="btn btn-primary" id="addWebEventBtn" style="margin-left:auto;"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add Event</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap" id="webEventsTableWrap"></div>
+        </div>
+      </section>
+
+      <!-- WEBSITE GALLERY (Admin only) — powers "Moments at KIC College" -->
+      <section class="view admin-only" id="view-websitegallery">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
+          <div><h2>Moments Gallery</h2><p>Photos shown in the "Moments at KIC College" slider on the public website.</p></div>
+          <button class="btn btn-primary" id="addGalleryBtn" style="margin-left:auto;"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add Photo</button>
+        </div>
+        <div class="card">
+          <div class="gallery-admin-grid" id="galleryAdminGrid"></div>
+        </div>
+      </section>
+
+      <!-- WEBSITE FACULTY (Admin only) — powers "Meet Our Faculty" -->
+      <section class="view admin-only" id="view-websitefaculty">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div><h2>Website Faculty</h2><p>The teacher/staff cards shown in "Meet Our Faculty" on the public website.</p></div>
+          <button class="btn btn-primary" id="addFacultyBtn" style="margin-left:auto;"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add Faculty</button>
+        </div>
+        <div class="card">
+          <div class="gallery-admin-grid" id="facultyAdminGrid"></div>
+        </div>
+      </section>
+
+      <!-- WEBSITE LIFE AT KIC (Admin only) — powers "Life at KIC" campus cards -->
+      <section class="view admin-only" id="view-websitelife">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="15" height="16" rx="2"/><path d="M17 8l5-3v14l-5-3"/></svg></div>
+          <div><h2>Life at KIC</h2><p>The photo/video cards shown in the "Life at KIC" section on the public website.</p></div>
+          <button class="btn btn-primary" id="addLifeBtn" style="margin-left:auto;"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add Item</button>
+        </div>
+        <div class="card">
+          <div class="gallery-admin-grid" id="lifeAdminGrid"></div>
+        </div>
+      </section>
+
+      <!-- FINANCE (Admin & Finance) -->
+      <section class="view fin-access" id="view-finance">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 6v.01M18 6v.01M6 18v-.01M18 18v-.01"/></svg></div>
+          <div><h2>Finance</h2><p>Record student fee payments and generate invoices.</p></div>
+        </div>
+        <div class="card">
+          <div class="filters">
+            <label class="field">Month<input type="month" id="financeMonth"></label>
+            <label class="field">Class / Room<select class="room-filter-select"></select></label>
+            <button class="btn btn-primary btn-sm" id="addInvoiceBtn" style="margin-left:auto;"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Record Payment</button>
+          </div>
+          <div class="table-wrap" id="financeListWrap"></div>
+        </div>
+      </section>
+
+      <!-- FEE STATUS (Admin & Finance) -->
+      <section class="view fin-access" id="view-feestatus">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+          <div><h2>Fee Status</h2><p>See which students have paid and which have not.</p></div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-top"><span class="stat-label">Paid</span><div class="stat-ico" style="background:var(--green)"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div></div><div class="stat-value" id="feePaidCount">0</div><div class="stat-sub">students</div></div>
+          <div class="stat-card"><div class="stat-top"><span class="stat-label">Not Paid</span><div class="stat-ico" style="background:var(--red)"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></div></div><div class="stat-value" id="feeUnpaidCount">0</div><div class="stat-sub">students</div></div>
+        </div>
+        <div class="card">
+          <div class="filters">
+            <label class="field">Month<input type="month" id="feeStatusMonth"></label>
+            <label class="field">Status<select id="feeStatusFilter"><option value="all">All</option><option value="paid">Paid</option><option value="unpaid">Not Paid</option></select></label>
+            <label class="field">Class / Room<select class="room-filter-select"></select></label>
+            <label class="field">Period<select id="feeStatusPeriod"></select></label>
+          </div>
+          <div class="table-wrap" id="feeStatusWrap"></div>
+        </div>
+      </section>
+
+      <!-- FINANCE DASHBOARD (Finance portal only) -->
+      <section class="view finance-only" id="view-findashboard">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/></svg></div>
+          <div><h2>Finance Dashboard</h2><p>Income, expenses and profit overview.</p></div>
+        </div>
+        <div class="card">
+          <div class="filters">
+            <label class="field">Month<input type="month" id="finDashMonth"></label>
+          </div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-top"><span class="stat-label">Total Income</span><div class="stat-ico" style="background:var(--green)"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div></div><div class="stat-value" id="finStatIncome">$0</div><div class="stat-sub" id="finStatIncomeSub">from fee payments</div></div>
+          <div class="stat-card"><div class="stat-top"><span class="stat-label">Total Expenses</span><div class="stat-ico" style="background:var(--red)"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div></div><div class="stat-value" id="finStatExpenses">$0</div><div class="stat-sub" id="finStatExpensesSub">recorded costs</div></div>
+          <div class="stat-card"><div class="stat-top"><span class="stat-label">Net Profit</span><div class="stat-ico" style="background:var(--teal-700)"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7"/></svg></div></div><div class="stat-value" id="finStatProfit">$0</div><div class="stat-sub">income − expenses</div></div>
+          <div class="stat-card"><div class="stat-top"><span class="stat-label">Payments Recorded</span><div class="stat-ico" style="background:var(--gold-dark)"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg></div></div><div class="stat-value" id="finStatCount">0</div><div class="stat-sub">invoices this month</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Record an Expense</h3></div>
+          <div class="form-grid">
+            <label class="field">Date<input type="date" id="expenseDate"></label>
+            <label class="field">Category<input type="text" id="expenseCategory" placeholder="e.g. Salaries, Rent, Supplies"></label>
+            <label class="field">Amount<input type="number" id="expenseAmount" min="0" placeholder="0.00"></label>
+            <label class="field">Note<input type="text" id="expenseNote" placeholder="Optional note"></label>
+          </div>
+          <div style="margin-top:14px;"><button class="btn btn-primary btn-sm" id="addExpenseBtn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add Expense</button></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Expenses This Month</h3></div>
+          <div class="table-wrap" id="expenseListWrap"></div>
+        </div>
+      </section>
+
+      <!-- SETTINGS (Admin only) -->
+      <section class="view admin-only" id="view-settings">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg></div>
+          <div><h2>Settings</h2><p>Customize organization name and period list.</p></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:14px;font-size:14px;">General</h3>
+          <div class="form-grid">
+            <label class="field" style="grid-column:1/-1;">Organization Name<input type="text" id="orgNameInput"></label>
+            <label class="field" style="grid-column:1/-1;">School Phone (shown on invoices)<input type="text" id="schoolPhoneInput" placeholder="e.g. +252 61 234 5678"></label>
+          </div>
+          <div style="margin-top:14px;"><button class="btn btn-primary btn-sm" id="saveSettingsBtn"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Save Settings</button></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:10px;font-size:14px;">Rooms</h3>
+          <p class="note" style="margin-bottom:14px;">Add, rename, or remove rooms. Every room shows up as an option when adding students and teachers.</p>
+          <div class="chip-list" id="roomChipList"></div>
+          <div class="add-row">
+            <input type="text" id="addRoomInput" placeholder="e.g. Room D">
+            <button type="button" class="btn btn-primary btn-sm" id="addRoomBtn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add Room</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:10px;font-size:14px;">Periods</h3>
+          <p class="note" style="margin-bottom:14px;">Add or remove class periods used for attendance and student records.</p>
+          <div class="chip-list" id="periodChipList"></div>
+          <div class="add-row">
+            <input type="text" id="addPeriodInput" placeholder="e.g. 6:00 PM">
+            <button type="button" class="btn btn-primary btn-sm" id="addPeriodBtn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add Period</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:10px;font-size:14px;">Roll Numbers</h3>
+          <p class="note">Roll numbers always start with "KIC00" (e.g. KIC001). Use this to convert students already in your roster.</p>
+          <div style="margin-top:12px;"><button class="btn btn-ghost btn-sm" id="applyKicPrefixBtn">Change All Roll Numbers to KIC00 Prefix</button></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:10px;font-size:14px;">Sample Data</h3>
+          <p class="note">Load 9 sample students spread across all 3 rooms with a week of attendance data.</p>
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm" id="loadSampleBtn">Load Sample Data</button>
+            <button class="btn btn-ghost btn-sm" id="deleteSampleBtn" style="color:var(--red);border-color:var(--red-bg);">Delete Sample Data</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- BACKUP (Admin only) -->
+      <section class="view admin-only" id="view-backup">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-1-8.9 5.5 5.5 0 0 1 10.7-1.7A4 4 0 0 1 18 18H7z"/></svg></div>
+          <div><h2>Backup &amp; Restore</h2></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:8px;font-size:14px;">Export</h3>
+          <p class="note">Download all data (students, teachers, attendance, settings, payments, expenses and results) as a JSON backup file.</p>
+          <div style="margin-top:12px;"><button class="btn btn-primary btn-sm" id="exportBackupBtn">Download Backup (.json)</button></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:8px;font-size:14px;">Restore</h3>
+          <p class="note">Restore from a previously downloaded backup file.</p>
+          <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+            <input type="file" id="importFileInput" accept="application/json">
+            <button class="btn btn-ghost btn-sm" id="importBackupBtn">Restore From File</button>
+          </div>
+        </div>
+        <div class="card"><p class="note" id="storageInfo">Calculating...</p></div>
+      </section>
+
+      <!-- MY ATTENDANCE (Student only) -->
+      <section class="view student-only" id="view-myattendance" style="display:none;">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M8.5 14.5l1.8 1.8 4-4.3"/></svg></div>
+          <div><h2 id="myAttName">My Attendance</h2><p id="myAttSubtitle">Your personal attendance record.</p></div>
+        </div>
+        <div class="card">
+          <div class="detail-grid" id="myAttSummary"></div>
+        </div>
+        <div class="report-grid">
+          <div class="card">
+            <div class="filters">
+              <label class="field">Filter by Month<input type="month" id="myAttMonthFilter"></label>
+              <button type="button" class="btn btn-ghost btn-sm" id="myAttShowAllBtn">Show All</button>
+            </div>
+            <div class="table-wrap" id="myAttTableWrap"></div>
+          </div>
+          <div class="card" style="margin:0;">
+            <h3 style="margin-bottom:10px;font-size:14px;">Present / Absent / Leave</h3>
+            <div class="chart-box"><canvas id="myAttChart"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MY RESULTS (Student) -->
+      <section class="view student-only" id="view-myresults" style="display:none;">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+          <div><h2>My Results</h2><p>View your exam results and attendance for any month.</p></div>
+        </div>
+        <div class="card">
+          <div class="filters">
+            <label class="field" id="myResultsMonthWrap">Month<input type="month" id="myResultsMonth"></label>
+            <label class="field">Exam Type<select id="myResultsExamType">
+              <option value="monthly">Monthly Exam</option>
+              <option value="bookend">Book End Exam</option>
+              <option value="final">Final Exam</option>
+            </select></label>
+          </div>
+        </div>
+        <div id="myResultsBody"></div>
+      </section>
+
+      <!-- MY INVOICES (Student) -->
+      <section class="view student-only" id="view-myinvoices" style="display:none;">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 6v.01M18 6v.01M6 18v-.01M18 18v-.01"/></svg></div>
+          <div><h2>My Invoices</h2><p>View and download your fee payment receipts.</p></div>
+        </div>
+        <div id="myInvoicesList"></div>
+      </section>
+
+      <!-- MY PROFILE (Admin, Teacher & Student) -->
+      <section class="view" id="view-profile">
+        <div class="section-title">
+          <div class="badge-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+          <div><h2>My Profile</h2><p id="profileSubtitle">Manage your account.</p></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:14px;font-size:14px;">Account Info</h3>
+          <div class="form-grid" id="profileInfoGrid"></div>
+          <div style="margin-top:14px;"><button class="btn btn-primary btn-sm" id="saveMyNameBtn"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Save Name</button></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:14px;font-size:14px;">Change Password</h3>
+          <div class="form-grid">
+            <label class="field" style="grid-column:1/-1;">Current Password<input type="password" id="myOldPassword" placeholder="Enter your current password"></label>
+            <label class="field" style="grid-column:1/-1;">New Password<input type="password" id="myNewPassword" placeholder="Min 4 characters"></label>
+            <label class="field" style="grid-column:1/-1;">Confirm New Password<input type="password" id="myConfirmPassword" placeholder="Re-enter new password"></label>
+          </div>
+          <div style="margin-top:14px;"><button class="btn btn-primary btn-sm" id="saveMyPasswordBtn"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Update Password</button></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- STUDENT MODAL -->
+<div class="modal-overlay hidden" id="studentModal">
+  <div class="modal">
+    <h3 id="studentModalTitle">Add New Student</h3>
+    <div class="form-grid">
+      <input type="hidden" id="studentId">
+      <label class="field" style="grid-column:1/-1;">Full Name<input type="text" id="inputName"></label>
+      <label class="field">Room<select id="inputRoom">
+        <option value="Room A">Room A</option>
+        <option value="Room B">Room B</option>
+        <option value="Room C">Room C</option>
+      </select></label>
+      <label class="field">Period<select id="inputPeriod"></select></label>
+      <label class="field">Roll No<input type="text" id="inputRoll" placeholder="KIC001"></label>
+      <label class="field" style="grid-column:1/-1;">Student Portal Password<input type="text" id="inputPassword" placeholder="Leave blank to use Roll No as password"></label>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="cancelStudentBtn">Cancel</button>
+      <button type="button" class="btn btn-primary" id="saveStudentBtn"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Save Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESET PASSWORD MODAL (Users, Admin only) -->
+<div class="modal-overlay hidden" id="resetPwModal">
+  <div class="modal">
+    <h3 id="resetPwModalTitle">Reset Password</h3>
+    <div class="form-grid">
+      <input type="hidden" id="resetPwKind">
+      <input type="hidden" id="resetPwId">
+      <label class="field" style="grid-column:1/-1;">New Password<input type="password" id="resetPwNew" placeholder="Min 4 characters"></label>
+      <label class="field" style="grid-column:1/-1;">Confirm New Password<input type="password" id="resetPwConfirm" placeholder="Re-enter new password"></label>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="cancelResetPwBtn">Cancel</button>
+      <button type="button" class="btn btn-primary" id="saveResetPwBtn"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Set Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT ENTRY MODAL (Admin & Teacher) -->
+<div class="modal-overlay hidden" id="resultModal">
+  <div class="modal" style="max-width:560px;">
+    <h3 id="resultModalTitle">Enter Results</h3>
+    <input type="hidden" id="resultStudentId">
+    <input type="hidden" id="resultMonthKey">
+    <input type="hidden" id="resultExamType">
+    <div class="form-grid">
+      <label class="field" style="grid-column:1/-1;">Exam Name<select id="resultExamName">
+        <option value="Monthly Exam">Monthly Exam</option>
+        <option value="Book End Exam">Book End Exam</option>
+        <option value="Final Exam">Final Exam</option>
+      </select></label>
+    </div>
+    <div style="margin:16px 0 8px;font-weight:800;font-size:13px;color:var(--ink);">Subjects</div>
+    <div class="subject-row-head">
+      <span>Subject</span><span>Marks</span><span>Max</span><span></span>
+    </div>
+    <div id="resultSubjectsList"></div>
+    <button type="button" class="btn btn-ghost btn-sm" id="addSubjectRowBtn" style="margin-top:10px;"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add Subject</button>
+    <div class="form-grid" style="margin-top:16px;">
+      <label class="field" style="grid-column:1/-1;">Remarks<textarea id="resultRemarks" rows="2" placeholder="Optional remarks for the student"></textarea></label>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="cancelResultBtn">Cancel</button>
+      <button type="button" class="btn btn-primary" id="saveResultBtn"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Save Results</button>
+    </div>
+  </div>
+</div>
+
+<!-- RECORD PAYMENT MODAL (Admin) -->
+<div class="modal-overlay hidden" id="invoiceModal">
+  <div class="modal">
+    <h3>Record Payment</h3>
+    <div class="form-grid">
+      <label class="field" style="grid-column:1/-1;">Student
+        <div class="combo-wrap">
+          <input type="text" id="invoiceStudentSearch" autocomplete="off" placeholder="Type a name to search…">
+          <input type="hidden" id="invoiceStudentId">
+          <div class="combo-list" id="invoiceStudentList"></div>
+        </div>
+      </label>
+      <label class="field">Month Covered<input type="month" id="invoiceMonth"></label>
+      <label class="field">Date Paid<input type="date" id="invoiceDate"></label>
+      <label class="field">Amount Paid<input type="number" id="invoiceAmount" min="0" step="0.01" placeholder="e.g. 25.00"></label>
+      <label class="field">Currency<input type="text" id="invoiceCurrency" placeholder="e.g. $ or USD"></label>
+      <label class="field" style="grid-column:1/-1;">Note<textarea id="invoiceNote" rows="2"></textarea></label>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="cancelInvoiceBtn">Cancel</button>
+      <button type="button" class="btn btn-primary" id="saveInvoiceBtn"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Save & Generate Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- INVOICE VIEWER / PRINT MODAL (Admin & Student) -->
+<div class="modal-overlay hidden" id="invoiceViewModal">
+  <div class="modal invoice-modal">
+    <div class="modal-actions no-print" style="justify-content:space-between;margin-bottom:14px;">
+      <button type="button" class="btn btn-ghost" id="closeInvoiceViewBtn">Close</button>
+      <button type="button" class="btn btn-primary" id="downloadInvoiceBtn"><svg id="downloadInvoiceIcon" viewBox="0 0 24 24"><path d="M12 3v13M7 11l5 5 5-5"/><path d="M5 21h14"/></svg><span id="downloadInvoiceLabel">Download</span></button>
+    </div>
+    <div id="invoicePrintArea"></div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="webEventModal">
+  <div class="modal">
+    <h3 id="webEventModalTitle">Add New Event</h3>
+    <div class="form-grid">
+      <input type="hidden" id="webEventId">
+      <label class="field" style="grid-column:1/-1;">Event Title<input type="text" id="webEventTitle" placeholder="e.g. Annual Graduation Ceremony"></label>
+      <label class="field">Date<input type="date" id="webEventDate"></label>
+      <label class="field">Tag<input type="text" id="webEventTag" placeholder="e.g. Orientation, Academic, Career"></label>
+      <label class="field" style="grid-column:1/-1;">Description<textarea id="webEventDesc" rows="3" placeholder="Short description shown on the website"></textarea></label>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="cancelWebEventBtn">Cancel</button>
+      <button type="button" class="btn btn-primary" id="saveWebEventBtn"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Save Event</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="galleryModal">
+  <div class="modal">
+    <h3 id="galleryModalTitle">Add Photo</h3>
+    <div class="form-grid">
+      <input type="hidden" id="galleryId">
+      <label class="field" style="grid-column:1/-1;">Photo
+        <div class="file-drop" id="galleryDrop">Tap to choose a photo<div id="galleryPreviewWrap"></div></div>
+        <input type="file" accept="image/*" id="galleryFile" style="display:none;">
+      </label>
+      <label class="field" style="grid-column:1/-1;">Caption (optional)<input type="text" id="galleryCaption" placeholder="e.g. Graduation Ceremony — Class of 2026"></label>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="cancelGalleryBtn">Cancel</button>
+      <button type="button" class="btn btn-primary" id="saveGalleryBtn"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Save Photo</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="facultyWebModal">
+  <div class="modal">
+    <h3 id="facultyWebModalTitle">Add Faculty Member</h3>
+    <div class="form-grid">
+      <input type="hidden" id="facultyWebId">
+      <label class="field" style="grid-column:1/-1;">Photo
+        <div class="file-drop" id="facultyWebDrop">Tap to choose a photo<div id="facultyWebPreviewWrap"></div></div>
+        <input type="file" accept="image/*" id="facultyWebFile" style="display:none;">
+      </label>
+      <label class="field" style="grid-column:1/-1;">Full Name<input type="text" id="facultyWebName" placeholder="e.g. Abdifatah Ali Isak"></label>
+      <label class="field">Role / Title<input type="text" id="facultyWebRole" placeholder="e.g. Principal"></label>
+      <label class="field">Department<input type="text" id="facultyWebDept" placeholder="e.g. English Teacher"></label>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="cancelFacultyWebBtn">Cancel</button>
+      <button type="button" class="btn btn-primary" id="saveFacultyWebBtn"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Save Faculty</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="lifeModal">
+  <div class="modal">
+    <h3 id="lifeModalTitle">Add Life at KIC Item</h3>
+    <div class="form-grid">
+      <input type="hidden" id="lifeId">
+      <label class="field" style="grid-column:1/-1;">Type
+        <select id="lifeType">
+          <option value="image">Photo</option>
+          <option value="video">Video (link)</option>
+        </select>
+      </label>
+      <label class="field" style="grid-column:1/-1;" id="lifeFileField">Photo
+        <div class="file-drop" id="lifeDrop">Tap to choose a photo<div id="lifePreviewWrap"></div></div>
+        <input type="file" accept="image/*" id="lifeFile" style="display:none;">
+      </label>
+      <label class="field" style="grid-column:1/-1;" id="lifeUrlField">Video
+        <div class="file-drop" id="lifeVideoDrop">Tap to choose a video from your phone/computer<div id="lifeVideoPreviewWrap"></div></div>
+        <input type="file" accept="video/*" id="lifeVideoFile" style="display:none;">
+        <div style="font-size:12px;color:var(--muted);margin-top:8px;">Or paste a direct video link instead (must end in .mp4 — a Facebook/YouTube page link will not work):</div>
+        <input type="text" id="lifeUrl" placeholder="https://.../video.mp4" style="margin-top:4px;">
+      </label>
+      <label class="field" style="grid-column:1/-1;">Label<input type="text" id="lifeLabel" placeholder="e.g. Modern Lecture Halls"></label>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="cancelLifeBtn">Cancel</button>
+      <button type="button" class="btn btn-primary" id="saveLifeBtn"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Save Item</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="teacherModal">
+  <div class="modal">
+    <h3 id="teacherModalTitle">Add New Teacher</h3>
+    <div class="form-grid">
+      <input type="hidden" id="teacherId">
+      <label class="field" style="grid-column:1/-1;">Full Name<input type="text" id="teacherInputName"></label>
+      <label class="field">Room<select id="teacherInputRoom">
+        <option value="Room A">Room A</option>
+        <option value="Room B">Room B</option>
+        <option value="Room C">Room C</option>
+      </select></label>
+      <label class="field">Username<input type="text" id="teacherInputUsername" placeholder="e.g. jsmith"></label>
+      <label class="field" style="grid-column:1/-1;">Password<input type="text" id="teacherInputPassword" placeholder="Min 4 characters"></label>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="cancelTeacherBtn">Cancel</button>
+      <button type="button" class="btn btn-primary" id="saveTeacherBtn"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Save Teacher</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXIT OVERLAY -->
+<div class="exit-overlay hidden" id="exitOverlay">
+  <div class="login-logo-badge" style="margin-bottom:18px;"><img src="img-4ac9b06c.png" alt="Kobciye International College logo"></div>
+  <h2>You've been logged out</h2>
+  <p>All data is safely synced to Supabase.</p>
+  <button class="btn btn-primary" id="returnBtn">Return to Website</button>
+</div>
+
+<div class="toast" id="toast"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg><span id="toastMsg">Saved</span></div>
+
+<script src="portal.js"></script>
+
+<div id="invoicePrintRoot" style="display:none;"></div>
+
+</body>
+</html>
