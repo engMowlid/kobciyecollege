@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kobciye International College – Baidoa, Somalia</title>
+<meta name="theme-color" content="#f5f5fb">
+<link rel="apple-touch-icon" href="img-2c8b4f18.png">
+<link rel="icon" type="image/png" sizes="192x192" href="img-2c8b4f18.png">
+<link rel="icon" type="image/png" sizes="512x512" href="img-0d682f79.png">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="KIC">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Public+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="course.css">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<!-- Supabase (used for site Reviews + Admission applications) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="window.__sbScriptFailed=true"></script>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-circle"><img src="img-4ac9b06c.png" alt="KIC Logo"></div>
+    <div class="nav-logo-text">
+      Kobciye International College
+      <span>Baidoa · Somalia</span>
+    </div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="javascript:void(0)" onclick="scrollToSection('about')" >About</a></li>
+    <li><a href="javascript:void(0)" onclick="scrollToSection('courses')" >Courses</a></li>
+    <li><a href="javascript:void(0)" onclick="scrollToSection('gallery')" >Gallery</a></li>
+    <li><a href="javascript:void(0)" onclick="scrollToSection('why')" >Why KIC</a></li>
+    <li><a href="javascript:void(0)" onclick="scrollToSection('vision')" >Vision</a></li>
+    <li><a href="javascript:void(0)" onclick="scrollToSection('faculty')" >Tutors</a></li>
+    <li><a href="javascript:void(0)" onclick="scrollToSection('events')" >Events</a></li>
+    <li><a href="javascript:void(0)" onclick="scrollToSection('contact')" >Contact</a></li>
+    <li class="nav-portals" id="navPortals">
+      <a href="javascript:void(0)">Portals <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></a>
+      <div class="nav-portals-menu">
+        <a href="javascript:void(0)" onclick="openPortal('admin')"><span class="portal-dot" style="background:#4a3fa0"></span>Admin</a>
+        <a href="javascript:void(0)" onclick="openPortal('teacher')"><span class="portal-dot" style="background:#00a000"></span>Teacher</a>
+        <a href="javascript:void(0)" onclick="openPortal('finance')"><span class="portal-dot" style="background:#6fd46f"></span>Finance</a>
+        <a href="javascript:void(0)" onclick="openPortal('student')"><span class="portal-dot" style="background:#8c84d6"></span>Student</a>
+      </div>
+    </li>
+    <li><a href="javascript:void(0)" onclick="scrollToSection('admission')"  class="nav-cta">Apply Now</a></li>
+  </ul>
+  <button class="nav-hamburger" id="hamburgerBtn" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile Menu Drawer -->
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+  <div class="mobile-drawer">
+    <ul class="mobile-drawer-links">
+      <li><a href="javascript:void(0)" onclick="scrollToSection('about')"  class="mobile-link">🏛️ About KIC</a></li>
+      <li><a href="javascript:void(0)" onclick="scrollToSection('courses')"  class="mobile-link">📚 Courses</a></li>
+      <li><a href="javascript:void(0)" onclick="scrollToSection('gallery')"  class="mobile-link">🖼️ Gallery</a></li>
+      <li><a href="javascript:void(0)" onclick="scrollToSection('why')"  class="mobile-link">⭐ Why KIC</a></li>
+      <li><a href="javascript:void(0)" onclick="scrollToSection('vision')"  class="mobile-link">🌅 Vision & Mission</a></li>
+      <li><a href="javascript:void(0)" onclick="scrollToSection('faculty')"  class="mobile-link">👩‍🏫 Tutors</a></li>
+      <li><a href="javascript:void(0)" onclick="scrollToSection('events')"  class="mobile-link">📅 Events</a></li>
+      <li><a href="javascript:void(0)" onclick="scrollToSection('contact')"  class="mobile-link">✉️ Contact</a></li>
+    </ul>
+    <div class="mobile-portals">
+      <div class="mobile-portals-label">Portals</div>
+      <a href="javascript:void(0)" onclick="openPortal('admin')" class="mobile-portal-btn mobile-link">🛡️ Admin</a>
+      <a href="javascript:void(0)" onclick="openPortal('teacher')" class="mobile-portal-btn mobile-link">👩‍🏫 Teacher</a>
+      <a href="javascript:void(0)" onclick="openPortal('finance')" class="mobile-portal-btn mobile-link">💳 Finance</a>
+      <a href="javascript:void(0)" onclick="openPortal('student')" class="mobile-portal-btn mobile-link">🎓 Student</a>
+    </div>
+    <div class="mobile-drawer-cta">
+      <a href="javascript:void(0)" onclick="scrollToSection('admission')"  class="mobile-link">🎓 Apply Now</a>
+    </div>
+    <div class="mobile-drawer-footer">© 2024 Kobciye International College</div>
+  </div>
+</div>
+
+<!-- PORTAL LOGIN OVERLAY -->
+<div id="portalOverlay">
+  <div class="portal-overlay-inner">
+    <div id="portalLoading" class="hidden"><div class="spinner"></div><span>Loading portal…</span></div>
+    <iframe id="portalOverlayFrame" src="about:blank" title="KIC Portal Login"></iframe>
+  </div>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge">Est. 2024 · Baidoa, Somalia</div>
+      <h1 class="hero-title">Shape Your Future at KIC College</h1>
+      <div class="hero-subtitle">Kobciye International College</div>
+      <p class="hero-desc">
+        A premier institution of higher learning in Somalia, empowering students with world-class education, professional skills, and values that build a better future.
+      </p>
+      <div class="hero-actions">
+        <a href="javascript:void(0)" onclick="scrollToSection('admission')"  class="btn-primary">🎓 Apply for Admission</a>
+        <a href="javascript:void(0)" onclick="scrollToSection('courses')"  class="btn-outline">Explore Courses</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-logo-card">
+        <img id="heroLogoImg" src="hero-seal.png" alt="Kobciye International College logo">
+      </div>
+      <div class="hero-tiles">
+        <div class="hero-stat"><div class="hero-stat-num">500+</div><div class="hero-stat-label">Students</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">6+</div><div class="hero-stat-label">Programs</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">8+</div><div class="hero-stat-label">Teachers</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">3+</div><div class="hero-stat-label">Years Strong</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-grid">
+    <div class="about-text reveal">
+      <div class="section-tag">About KIC</div>
+      <h2 class="section-title">A Legacy of Excellence in Education</h2>
+      <p class="lead">Kobciye International College (KIC) was founded in 2024 with a bold vision: to provide accessible, high-quality higher education to the people of Somalia. Situated in Baidoa, the capital of the Bay Region, KIC stands as a beacon of academic excellence and community development.</p>
+      <p class="more">We believe that education is the most powerful tool for transforming lives and rebuilding our nation. Our programs are designed to equip students with both theoretical knowledge and practical skills, preparing them for the global workforce.</p>
+    </div>
+    <div class="about-bento reveal">
+      <div class="about-img-card">
+        <div class="about-year-badge">Since 2024</div>
+        <img src="img-42d235a2.jpg" alt="Kobciye International College" class="about-big-logo">
+        <div>
+          <div class="about-card-text">Kobciye International College</div>
+          <div class="about-card-sub">Baidoa · Bay Region · Somalia</div>
+        </div>
+      </div>
+      <div class="about-feat"><div class="about-feat-icon">🏛️</div><div><h4>Accredited Institution</h4><p>Recognized by KGS's Ministry of Education</p></div></div>
+<div class="about-feat"><div class="about-feat-icon">🌍</div><div><h4>International Standards</h4><p>Curriculum benchmarked globally</p></div></div>
+<div class="about-feat"><div class="about-feat-icon">📚</div><div><h4>Research Focused</h4><p>Encouraging innovation and discovery</p></div></div>
+<div class="about-feat"><div class="about-feat-icon">🤝</div><div><h4>Community-Driven</h4><p>Serving and uplifting Baidoa & beyond</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- COURSES -->
+<section id="courses">
+  <div class="container">
+    <div class="section-header centered reveal">
+      <div class="section-tag">Academic Programs</div>
+      <h2 class="section-title">Explore Our <span>Courses</span></h2>
+      <div class="divider centered"></div>
+      <p class="section-subtitle">Discover a wide range of diploma programs designed to meet the needs of modern Somalia and the global marketplace.</p>
+    </div>
+    <div class="courses-grid">
+      <div class="course-card reveal">
+        <div class="course-header"><span class="course-icon">🗣️</span><span class="course-level">Diploma</span></div>
+        <div class="course-body">
+          <h3 class="course-name">English Language</h3>
+          <p class="course-desc">Build strong English communication skills from the basics through advanced grammar, preparing you for academic and professional success.</p>
+          <div class="course-foot"><div class="course-meta"><span>⏱ 1 Year</span>
+            <span>📖 Full-time</span></div><button class="course-btn view-course-btn" data-course="business">View Course →</button></div>
+        </div>
+      </div>
+      <div class="course-card reveal">
+        <div class="course-header"><span class="course-icon">💻</span><span class="course-level">Diploma</span></div>
+        <div class="course-body">
+          <h3 class="course-name">Computer Science</h3>
+          <p class="course-desc">Learn essential computer skills from the basics through Microsoft Office, graphic design, video editing, and web development.</p>
+          <div class="course-foot"><div class="course-meta"><span>⏱ 1 Year</span>
+            <span>📖 Full-time</span></div><button class="course-btn view-course-btn" data-course="cs">View Course →</button></div>
+        </div>
+      </div>
+      <div class="course-card reveal">
+        <div class="course-header"><span class="course-icon">💉</span><span class="course-level">Diploma</span></div>
+        <div class="course-body">
+          <h3 class="course-name">Health Science</h3>
+          <p class="course-desc">Gain hands-on clinical and theoretical training in patient care, anatomy, pharmacology, and community health.</p>
+          <div class="course-foot"><div class="course-meta"><span>⏱ 1 Year</span>
+            <span>📖 Full-time</span></div><button class="course-btn view-course-btn" data-course="law">View Course →</button></div>
+        </div>
+      </div>
+      <div class="course-card reveal">
+        <div class="course-header"><span class="course-icon">🏥</span><span class="course-level">Diploma</span><span class="course-soon">Coming Soon</span></div>
+        <div class="course-body">
+          <h3 class="course-name">Midwifery</h3>
+          <p class="course-desc">Gain the clinical and reproductive health expertise to care for mothers and newborns.</p>
+          <div class="course-foot"><div class="course-meta"><span>⏱ 1 Year</span>
+            <span>📖 Full-time</span></div><button class="course-btn view-course-btn" data-course="health">View Course →</button></div>
+        </div>
+      </div>
+      <div class="course-card reveal">
+        <div class="course-header"><span class="course-icon">🔬</span><span class="course-level">Diploma</span><span class="course-soon">Coming Soon</span></div>
+        <div class="course-body">
+          <h3 class="course-name">Scientific Subjects</h3>
+          <p class="course-desc">Build a strong foundation in Biology, Chemistry, Physics, and Math for further studies.</p>
+          <div class="course-foot"><div class="course-meta"><span>⏱ 1 Year</span>
+            <span>📖 Full-time</span></div><button class="course-btn view-course-btn" data-course="economics">View Course →</button></div>
+        </div>
+      </div>
+      <div class="course-card reveal">
+        <div class="course-header"><span class="course-icon">💡</span><span class="course-level">Diploma</span><span class="course-soon">Coming Soon</span></div>
+        <div class="course-body">
+          <h3 class="course-name">Personal Development</h3>
+          <p class="course-desc">Build the personal growth and self-improvement skills to lead, adapt, and thrive in any setting.</p>
+          <div class="course-foot"><div class="course-meta"><span>⏱ 1 Year</span>
+            <span>📖 Part-time</span></div><button class="course-btn view-course-btn" data-course="ir">View Course →</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section id="gallery" hidden>
+  <div class="container">
+    <div class="section-header centered reveal">
+      <div class="section-tag">Campus Life</div>
+      <h2 class="section-title">Moments at <span style="color:var(--blue)">KIC College</span></h2>
+      <p class="section-subtitle">A glimpse into graduation day, hands-on clinical training, and life on campus.</p>
+    </div>
+    <div class="gallery-slider-wrap">
+    <div class="gallery-slider" id="galleryGrid">
+    </div>
+  </div>
+    </div>
+    </div>
+</section>
+
+<!-- WHY CHOOSE US -->
+<section id="why">
+  <div class="container">
+    <div class="section-header centered reveal">
+      <div class="section-tag">Why Choose KIC</div>
+      <h2 class="section-title">What Makes Us Different</h2>
+      <p class="section-subtitle">We don't just educate — we transform lives and build the future of Somalia.</p>
+    </div>
+    <div class="why-grid">
+      <div class="why-card reveal">
+        <span class="why-icon">🏆</span>
+        <div class="why-num">Top 10</div>
+        <h3>Ranked in Bay Region</h3>
+        <p>Recognized as the top higher education institution in the Bay & Bakool regions of Somalia.</p>
+      </div>
+      <div class="why-card reveal">
+        <span class="why-icon">📚</span>
+        <div class="why-num">6+</div>
+        <h3>Programs</h3>
+        <p>Highly qualified professors and lecturers with national and international academic experience.</p>
+      </div>
+      <div class="why-card reveal">
+        <span class="why-icon">🧑‍🎓</span>
+        <div class="why-num">100%</div>
+        <h3>Student-Focused</h3>
+        <p>Scholarships, flexible programs, and student support systems designed for every learner.</p>
+      </div>
+      <div class="why-card reveal">
+        <span class="why-icon">🌟</span>
+        <div class="why-num">3+</div>
+        <h3>Years of Trust</h3>
+        <p>Building on 3+ years of academic excellence, community trust, and graduate success stories.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VISION, MISSION, VALUES -->
+<section id="vision">
+  <div class="container">
+    <div class="section-header centered reveal">
+      <div class="section-tag">Our Foundation</div>
+      <h2 class="section-title">Vision, Mission &amp; <span>Values</span></h2>
+      <div class="divider centered"></div>
+    </div>
+    <div class="vm-grid">
+      <div class="vm-card vision reveal">
+        <span class="vm-icon">🌅</span>
+        <h2>Our Vision</h2>
+        <div class="vm-divider"></div>
+        <p>To be the leading institution in Somalia and the Horn of Africa — producing globally competent, ethically grounded, and socially responsible graduates who drive sustainable development.</p>
+      </div>
+      <div class="vm-card mission reveal">
+        <span class="vm-icon">🎯</span>
+        <h2>Our Mission</h2>
+        <div class="vm-divider"></div>
+        <p>To deliver transformative, accessible, and high-quality education through innovative teaching, research, and community engagement — equipping students with the skills and character to lead and serve.</p>
+      </div>
+      <div class="vm-card values reveal">
+        <span class="vm-icon">⭐</span>
+        <h2>Core Values</h2>
+        <div class="vm-divider"></div>
+        <ul class="values-list">
+          <li>Excellence in Teaching &amp; Learning</li>
+          <li>Integrity &amp; Academic Honesty</li>
+          <li>Inclusivity &amp; Equal Opportunity</li>
+          <li>Innovation &amp; Critical Thinking</li>
+          <li>Community Service &amp; Nation Building</li>
+          <li>Islamic Ethics &amp; Moral Character</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="container">
+    <div class="section-header centered reveal">
+      <div class="section-tag">Student Voices</div>
+      <h2 class="section-title">What Our <span>Students Say</span></h2>
+      <div class="divider centered"></div>
+    </div>
+    <div class="testi-slider">
+      <button type="button" class="testi-nav-btn" id="testiPrevBtn" aria-label="Previous review"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <div class="testi-grid" id="testiGrid"></div>
+      <button type="button" class="testi-nav-btn" id="testiNextBtn" aria-label="Next review"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+    </div>
+    <div class="testi-dots" id="testiDots"></div>
+
+    <div class="testi-cta">
+      <button type="button" class="testi-write-btn" id="testiWriteBtn">✍️ Write a Review</button>
+    </div>
+
+    <div class="review-form-wrap" id="reviewFormWrap">
+      <h3>Share your experience</h3>
+      <div class="review-form-status" id="reviewFormStatus"></div>
+      <form id="reviewForm">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" name="reviewer_name" placeholder="Your name" required>
+        </div>
+        <div class="form-group">
+          <label>Program / Role</label>
+          <input type="text" name="reviewer_role" placeholder="e.g. Graduate, Computer Science '24">
+        </div>
+        <div class="form-group">
+          <label>Your Rating</label>
+          <div class="review-star-picker" id="reviewStarPicker">
+            <button type="button" data-star="1">★</button>
+            <button type="button" data-star="2">★</button>
+            <button type="button" data-star="3">★</button>
+            <button type="button" data-star="4">★</button>
+            <button type="button" data-star="5">★</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Your Review</label>
+          <textarea name="reviewer_text" placeholder="Tell us about your experience at KIC..." required></textarea>
+        </div>
+        <button type="submit" class="btn-submit">Submit Review →</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FACULTY -->
+<section id="faculty">
+  <div class="container">
+    <div class="section-header centered reveal">
+      <div class="section-tag">Academic Team</div>
+      <h2 class="section-title">Meet Our <span>Tutors</span></h2>
+      <div class="divider centered"></div>
+      <p class="section-subtitle">Our educators bring decades of academic, research, and professional expertise to the classroom.</p>
+    </div>
+    <div class="faculty-grid" id="facultyGrid">
+      <div class="faculty-card"><div class="faculty-body"><div class="faculty-name" style="font-weight:500;color:var(--muted)">Loading tutors…</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- EVENTS -->
+<section id="events">
+  <div class="container">
+    <div class="section-header centered reveal">
+      <div class="section-tag">Campus Life</div>
+      <h2 class="section-title">Upcoming <span>Events</span></h2>
+      <div class="divider centered"></div>
+    </div>
+    <div class="events-grid" id="eventsGrid">
+      <div class="event-card reveal"><div class="event-info"><p>Loading events…</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CAMPUS LIFE -->
+<section id="campus" hidden>
+  <div class="container">
+    <div class="section-header centered reveal">
+      <div class="section-tag">Campus Life</div>
+      <h2 class="section-title">Life at <span>KIC</span></h2>
+      <div class="divider centered"></div>
+    </div>
+    <div class="campus-grid" id="campusGrid">
+    </div>
+  </div>
+</section>
+
+<!-- ADMISSION FORM -->
+<section id="admission">
+  <div class="admission-inner">
+    <div class="admission-info reveal">
+      <div class="section-tag">Apply Today</div>
+      <h2 class="section-title">Start Your <span>Journey</span><br>at KIC</h2>
+      <div class="divider"></div>
+      <p class="section-subtitle">Join hundreds of students who are building their future at Kobciye International College. Applications for 2025–2026 are now open.</p>
+      <ul class="admission-steps">
+        <li>
+          <div class="step-num">1</div>
+          <span>Complete the online application form</span>
+        </li>
+        <li>
+          <div class="step-num">2</div>
+          <span>Submit your academic transcripts and documents</span>
+        </li>
+        <li>
+          <div class="step-num">3</div>
+          <span>Attend the entrance assessment or interview</span>
+        </li>
+        <li>
+          <div class="step-num">4</div>
+          <span>Receive your admission letter and enroll</span>
+        </li>
+      </ul>
+    </div>
+    <div class="adm-form reveal">
+      <h3>Admission Application</h3>
+      <p>Fill in your details below and our admissions team will contact you within 48 hours.</p>
+      <form id="admissionForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" name="first_name" placeholder="Ahmed" required>
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" name="last_name" placeholder="Hassan" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" name="email" placeholder="ahmed@example.com" required>
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" name="phone" placeholder="+252 61 000 0000" required>
+      </div>
+      <div class="form-group">
+        <label>Desired Program</label>
+        <select name="program" required>
+          <option value="">Select a program...</option>
+          <option>English Language</option>
+          <option>Computer Science</option>
+          <option>Health Science</option>
+          <option>Midwifery</option>
+          <option>Scientific Subjects</option>
+          <option>Personal Development</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Previous School</label>
+          <input type="text" name="previous_school" placeholder="Previous school name">
+        </div>
+        <div class="form-group">
+          <label>Level</label>
+          <select name="level">
+            <option value="">Select a level...</option>
+            <option>Basic</option>
+            <option>Beginner</option>
+            <option>Intermediate</option>
+            <option>Advanced</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Why do you want to join KIC?</label>
+        <textarea name="message" placeholder="Tell us about your goals and aspirations..."></textarea>
+      </div>
+      <div id="admissionStatus" style="display:none; margin-bottom:14px; padding:12px 14px; border-radius:10px; font-size:14px; font-weight:600;"></div>
+      <button type="submit" class="btn-submit" id="admissionSubmitBtn">
+        Submit Application →
+      </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="section-header centered reveal">
+      <div class="section-tag">Get In Touch</div>
+      <h2 class="section-title">Contact <span>Us</span></h2>
+      <div class="divider centered"></div>
+      <p class="section-subtitle">We're here to answer your questions and help you take the next step in your academic journey.</p>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-card reveal">
+        <div class="contact-icon">📍</div>
+        <h3>Our Location</h3>
+        <p>
+          Kobciye International College<br>
+          Baidoa, Bay Region<br>
+          South-West State, Somalia
+        </p>
+      </div>
+      <div class="contact-card reveal">
+        <div class="contact-icon">📞</div>
+        <h3>Call Us</h3>
+        <p>
+          Main: <a href="tel:+252612445222">061 244 5222</a><br>
+          Admissions: <a href="tel:+252612445222">061 244 5222</a><br>
+          Sat–Wed, 1PM – 8PM
+        </p>
+      </div>
+      <div class="contact-card reveal">
+        <div class="contact-icon">✉️</div>
+        <h3>Email Us</h3>
+        <p>
+          Admissions: <a href="mailto:kiccollege2024@gmail.com">kiccollege2024@gmail.com</a><br>
+          We reply within 24 hours
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<div class="cta-wrap">
+  <div class="cta-band">
+    <div>
+      <h3>Ready to start your journey?</h3>
+      <p>Applications for 2025–2026 are open.</p>
+    </div>
+    <a href="javascript:void(0)" onclick="scrollToSection('admission')">Apply now</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">
+        <div class="footer-logo-icon"><img src="img-4ac9b06c.png" alt="KIC Logo"></div>
+        <div class="footer-logo-text">
+          Kobciye International College
+          <span>Baidoa · Somalia · Est. 2024</span>
+        </div>
+      </div>
+      <p class="footer-desc">Empowering Somalia's next generation of leaders through world-class education, research, and community service. Excellence is not a destination — it's our daily standard.</p>
+      <div class="footer-social">
+        <a href="https://www.facebook.com/share/p/19MmpCqXKg/" target="_blank" rel="noopener" class="social-btn" aria-label="Facebook">f</a>
+        <a href="https://www.tiktok.com/@kobciyecollege" target="_blank" rel="noopener" class="social-btn" aria-label="TikTok"><svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg></a>
+        <span class="social-btn" aria-disabled="true" style="cursor:default">in</span>
+        <span class="social-btn" aria-disabled="true" style="cursor:default">▶</span>
+      </div>
+    </div>
+    <div>
+      <h4>Quick Links</h4>
+      <ul class="footer-links">
+        <li><a href="javascript:void(0)" onclick="scrollToSection('about')" >About KIC</a></li>
+        <li><a href="javascript:void(0)" onclick="scrollToSection('courses')" >Programs</a></li>
+        <li><a href="javascript:void(0)" onclick="scrollToSection('why')" >Why Choose Us</a></li>
+        <li><a href="javascript:void(0)" onclick="scrollToSection('faculty')" >Tutors</a></li>
+        <li><a href="javascript:void(0)" onclick="scrollToSection('events')" >Events</a></li>
+        <li><a href="javascript:void(0)" onclick="scrollToSection('admission')" >Apply Now</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Programs</h4>
+      <ul class="footer-links">
+        <li><a href="javascript:void(0)" onclick="scrollToSection('courses')" >English Language</a></li>
+        <li><a href="javascript:void(0)" onclick="scrollToSection('courses')" >Computer Science</a></li>
+        <li><a href="javascript:void(0)" onclick="scrollToSection('courses')" >Health Science</a></li>
+        <li><a href="javascript:void(0)" onclick="scrollToSection('courses')" >Midwifery</a></li>
+        <li><a href="javascript:void(0)" onclick="scrollToSection('courses')" >Scientific Subjects</a></li>
+        <li><a href="javascript:void(0)" onclick="scrollToSection('courses')" >Personal Development</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Information</h4>
+      <ul class="footer-links">
+        <li><a href="#">Academic Calendar</a></li>
+        <li><a href="#">Scholarships</a></li>
+        <li><a href="#">Student Portal</a></li>
+        <li><a href="#">Library</a></li>
+        <li><a href="#">Research</a></li>
+        <li><a href="javascript:void(0)" onclick="scrollToSection('contact')" >Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2024 <span>Kobciye International College</span>. All rights reserved.</div>
+    <div>Built with pride for <span>Somalia 🇸🇴</span></div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<!-- COURSE DETAIL PAGE OVERLAY (redesigned) -->
+<div id="courseOverlay" class="cp-overlay" role="dialog" aria-modal="true" aria-labelledby="cpHeroTitle">
+  <div class="kc-page">
+
+    <!-- Floating top bar -->
+    <header class="kc-top">
+      <button class="kc-back" onclick="closeCourse()" aria-label="Back to courses">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="kc-top-title" id="cpTopbarTitle"></div>
+      <a href="javascript:void(0)" onclick="closeCourse();scrollToSection('admission')" class="kc-top-apply">Apply</a>
+    </header>
+
+    <!-- Hero -->
+    <section class="kc-hero" id="cpHero">
+      <div class="kc-hero-photo" id="cpHeroPhoto"><img id="cpHeroImg" alt=""></div>
+      <div class="kc-hero-mark" id="cpHeroIcon" aria-hidden="true"></div>
+      <div class="kc-hero-inner">
+        <div class="kc-eyebrow" id="cpHeroTag"></div>
+        <h1 class="kc-title" id="cpHeroTitle"></h1>
+        <p class="kc-lede" id="cpHeroDesc"></p>
+        <div class="kc-chips" id="cpHeroMeta"></div>
+        <div class="kc-hero-actions">
+          <a href="javascript:void(0)" onclick="closeCourse();scrollToSection('admission')" class="kc-btn kc-btn-amber">Apply for this course</a>
+          <a href="javascript:void(0)" onclick="kcGo('kcCurriculum')" class="kc-btn kc-btn-ghost">See what you'll study</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fact strip (overlaps hero) -->
+    <div class="kc-wrap">
+      <div class="kc-facts" id="cpStats"></div>
+    </div>
+
+    <!-- Sticky section tabs -->
+    <div class="kc-tabs" id="kcTabs" role="navigation" aria-label="Course sections">
+      <div class="kc-tabs-in">
+        <button data-target="kcOverview" class="on" onclick="kcGo('kcOverview')">Overview</button>
+        <button data-target="kcCurriculum" onclick="kcGo('kcCurriculum')">Curriculum</button>
+        <button data-target="kcCareers" onclick="kcGo('kcCareers')">Careers</button>
+      </div>
+    </div>
+
+    <main class="kc-wrap kc-main">
+
+      <!-- Overview -->
+      <section id="kcOverview" class="kc-sec">
+        <div class="kc-sec-label"><span>01</span> About this course</div>
+        <h2 class="kc-h2" id="cpOverviewTitle"></h2>
+        <div class="kc-overview">
+          <p class="kc-story" id="cpOverviewText"></p>
+          <div class="kc-learn">
+            <h3>What you'll build</h3>
+            <ul id="cpHighlights"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Curriculum -->
+      <section id="kcCurriculum" class="kc-sec">
+        <div class="kc-sec-label"><span>02</span> Curriculum</div>
+        <h2 class="kc-h2">Your path, <em>step by step</em></h2>
+        <p class="kc-sub" id="kcCurSub"></p>
+        <div class="kc-timeline" id="cpYears"></div>
+      </section>
+
+      <!-- Careers -->
+      <section id="kcCareers" class="kc-sec">
+        <div class="kc-sec-label"><span>03</span> After graduation</div>
+        <h2 class="kc-h2">Where this <em>can take you</em></h2>
+        <div class="kc-careers" id="cpCareers"></div>
+      </section>
+
+      <!-- End CTA -->
+      <section class="kc-end">
+        <div>
+          <h2>Ready to start?</h2>
+          <p>Applications are open. Take the first step toward this course today.</p>
+        </div>
+        <a href="javascript:void(0)" onclick="closeCourse();scrollToSection('admission')" class="kc-btn kc-btn-amber">Apply now →</a>
+      </section>
+    </main>
+
+    <!-- Mobile bottom dock -->
+    <div class="kc-dock">
+      <div class="kc-dock-txt"><small>Now enrolling</small><strong id="kcDockTitle"></strong></div>
+      <a href="javascript:void(0)" onclick="closeCourse();scrollToSection('admission')" class="kc-btn kc-btn-amber">Apply now</a>
+    </div>
+  </div>
+</div>
+
+
+
+<script src="course.js"></script>
+
+
+
+</body>
+</html>
